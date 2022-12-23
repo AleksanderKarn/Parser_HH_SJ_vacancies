@@ -12,6 +12,7 @@ class Connector:
     __data_file = None
 
     def __init__(self, df):
+        print(f'инициализация экземпляра класса Connector')
         self.__data_file = df
         self.__connect()
 
@@ -27,6 +28,8 @@ class Connector:
         self.__connect()
 
     def __connect(self):
+
+        print(f'Работает метод __connect__- проверка/создание файла')
         """
         Проверка на существование файла с данными и
         создание его при необходимости
@@ -48,6 +51,7 @@ class Connector:
 
 
     def insert(self, data):
+        print(f'Работает метод __Insert__ идет запись данных...')
         """
         Запись данных в файл с сохранением структуры и исходных данных
         """
@@ -60,6 +64,7 @@ class Connector:
 
 
     def select(self, query):
+        print(f'работает метод __select__ фильтруект по {query}')
         """
         Выбор данных из файла с применением фильтрации
         query содержит словарь, в котором ключ это поле для
@@ -67,36 +72,48 @@ class Connector:
         {'price': 1000}, должно отфильтровать данные по полю price
         и вернуть все строки, в которых цена 1000
         """
-        with open("vacancy_list.json", encoding="utf-8") as f:
+        with open(self.__data_file, encoding="utf-8") as f:
             data = json.load(f)
 
         if not len(query): return data  ## если квери пустой запрос на фильтрацию данных то возвращаем все данные файла
 
         query_data = []  ## отфильтрованный список
 
-        for i in data:  # [query.keys()]:
+        for i in data:
+
+            print(f'{list(query.keys())[0]}')
+            print('*'* 40)
+            print(f'{list(query.values())[0]}')
+
             if i[f'{list(query.keys())[0]}'] == f'{list(query.values())[0]}':
                 query_data.append(i)
-                print(query_data)
+        print(query_data)
         return query_data
 
     def delete(self, query):
+        print(f'Работает метод __delete__ - удаляет {query}')
         """
         Удаление записей из файла, которые соответствуют запрос,
         как в методе select. Если в query передан пустой словарь, то
         функция удаления не сработает
         """
-        if not len(query): return
+        if not len(query): return None
 
         with open(self.__data_file, encoding="utf=8") as f:
             data = json.load(f)
 
-        count = 0
+        count = 0 # счетчик
 
         for i in data:
+
+            print(i.get(list(query.keys())[0]))
+            print('*' * 40)
+            print(list(query.values())[0])
+
             if i.get(list(query.keys())[0]) == list(query.values())[0]:
                 del data[count]
             count += 1
+
         with open(self.__data_file, "w", encoding="utf=8") as f:
             json.dump(data, f)
 
@@ -147,22 +164,26 @@ class Vacancy:
     def __eq__(self, other):
         return self.salary == other.salary
 
-    def __ne__(self):
+    def __ne__(self, other):
         return self.salary != other.salary
 
     def __lt__(self, other):
         return self.salary < other.salary
 
-    def __len__(self):
+    def __len__(self, other):
         return self.salary <= other.salary
 
     def __gt__(self, other):
         return self.salary > other.salary
 
-    def __ge__(self):
+    def __ge__(self, other):
         return self.salary >= other.salary
 
+    def __iter__(self):
+        pass
 
+    def __next__(self):
+        pass
 
 
 
@@ -206,7 +227,7 @@ def select(query):
 
     query_data = []  ## отфильтрованный список
 
-    for i in data:#[query.keys()]:
+    for i in data:
         if i[f'{list(query.keys())[0]}'] == f'{list(query.values())[0]}':
             query_data.append(i)
             print(query_data)
@@ -215,13 +236,6 @@ def select(query):
 query = {"salary": "з/п не указана"}
 
 #select(query)
-
-#print(list(query.keys())[0])
-a = "от 60000 до 220000 руб. на руки"
-a = a.split('до')[0]
-
-#new_a = ''.join([i for i in a if i.isdigit()])
-#print(new_a)
 
 file = 'vacancy_list.json'
 def func(file):
@@ -240,6 +254,4 @@ def func(file):
     return obj_list  # возвращаю список обьекктов класса hhru
 
 
-
 print(func(file))
-#print(v)
