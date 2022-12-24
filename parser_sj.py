@@ -1,103 +1,118 @@
-from abc import ABC, abstractmethod
 import requests
 from bs4 import BeautifulSoup as BS
 import fake_useragent as FU
-import time
 import json
 
-
-
 url = 'https://www.superjob.ru'
-def get_vacancy(text):
+ua = FU.UserAgent()
 
-    ua = FU.UserAgent()  # экземпляр класса фейкюзер агента
-    data = requests.get(
-        url=f'{url}/vacancy/search/?keywords={text}',
-        headers={"user-agent": ua.random}
-    )
-    if data.status_code != 200:
-        return
-    soup = BS(data.content, 'lxml')
-    l = []
-    for i in range(4):
-        print(i)
-        if i == 0:
-            print('__if__')
-            continue
-        elif i == 1:
-            print('__elif__')
+def page_count():
+    """
+    Функция находит колличество страниц
+     с вакансиями по  запросу пользователя.
+    """
+    soup = get_soup(n=0)
 
+    pager_count = int(
+        soup.find(
+            'div', attrs={
+                'class': '_2zPWM _9mI07 _2refD _35SiA _3Gpjg _3vngu _1GAZu'}).find_all('span',recursive=True)[-6].text
+    ) ## методом проб и ошибок вычислил такой вот способ вычленения значения всех страниц вакансий
+    return pager_count
+
+def get_soup(text=input('Введите название вакансии: '), n=0, link=None):
+    """
+    Функция возвращает данные HTML страницы
+    распаршенные при помощи библиотеки BS4
+    """
+
+    if link == None:
+
+        if n >= 2:
+            data = requests.get(
+                url=f'{url}/vacancy/search/?keywords={text}&page={n}',
+                headers={"user-agent": ua.random}
+            )
+        else:
             data = requests.get(
                 url=f'{url}/vacancy/search/?keywords={text}',
                 headers={"user-agent": ua.random}
             )
-        #   if data.status_code != 200:
-        #       print(data.status_code)
-        #       continue
-        #   if not data:
-        #       break
-            soup = BS(data.content, 'lxml')
+    else:
+        data = requests.get(
+            url=link,
+            headers={"user-agent": ua.random}
+        )
+    soup = BS(data.content, 'lxml')
+    return soup
 
-            for i in soup.find_all('a'):
-                if i['href'].split('.')[-1] == 'html':
-                    if 'vakansii' in i['href'].split('/'):
-                        l.append(f"{url}{i['href']}")
-        else:
-            print('__else__')
-            data = requests.get(
-                url=f'{url}/vacancy/search/?keywords={text}&page={i}',
-                headers={"user-agent": ua.random}
-            )
-            soup = BS(data.content, 'lxml')
+def get_link(soup, list_vacancies):
+    """
+    Функция проходит циклом по всем ссылкам
+    с странциы, вычисляект нужные и добавляет их в список
+    """
+    for a in soup.find_all('a'):  ## Цикл по всем ссылкам страницы
+        if a['href'].split('.')[-1] == 'html':  # выбираю ссылки по ключу 'href' заканчивающиеся на 'html'
+            if 'vakansii' in a['href'].split(
+                    '/'):  ## дальше работаю со строкой разбивая ее по слешу и выбирая лиш те строки в которых есть слово vacancy
+                list_vacancies.append(f"{url}{a['href']}")  # формирую строку - ссылку и складываю ее в список
 
-            for i in soup.find_all('a'):
-                if i['href'].split('.')[-1] == 'html':
-                    if 'vakansii' in i['href'].split('/'):
-                        l.append(f"{url}{i['href']}")
 
-    return l
+def get_vacancy():
+    """
+    Функция собирает все вакансии со
+    всех страниц в список
+    """
+    list_vacancies = [] # список вакаансий со страницы сервиса
+
+    for i in range(page_count()+1): # основной цикл програмы проходящий по каждой странице в зависимости от их колличества
+        if i == 0:
+            continue
+        else: ## условие попадания на первую страницу вакансий
+            soup = get_soup(n=i) # получаем все данные с первой страницы
+        get_link(soup, list_vacancies)
+    return list_vacancies
+
 
 def get_data(link):
-    ua = FU.UserAgent()  # экземпляр класса фейкюзер агента
-    data = requests.get(
-        url=link,
-        headers={"user-agent": ua.random}
-    )
-    if data.status_code != 200:
-        return
-    soup = BS(data.content, 'lxml')
+    """
+    Функция создает объекты вакансий в
+    виде словарей в которых ключи названия
+    полей а значения - ссылкка, зарплата,
+    обязанности и название вакансии
+    """
+    soup = get_soup(n=0, link=link) ## генерирую данные из ссылок на вакансии  и достаю нужные
     try:
         name = soup.find(attrs={'class': "_2s70W _31udi _7mW5l _17ECX _1B2ot _3EXZS _3pAka ofdOE"}).text
     except:
-        name ='Название не указано'
+        name = 'Название не указано'
     try:
         salary = soup.find(attrs={'class': "f-test-text-company-item-salary"}).text.replace(' ', '')
-        print(salary)
     except:
-        salary ='Зп не указана'
+        salary = 'Зп не указана'
     try:
         description = soup.find(attrs={'class': "_1G5lt _3EXZS _3pAka _3GChV _2GgYH"}).text
     except:
-        description ='-'
+        description = '-'
     vacancy = {
         "name": name,
         "salary": salary,
         "description": description,
         "link": link
-    }
-
+    }  ## формирую данные в формате словаря
     return vacancy
 
-text = 'python'
 
-
-if __name__ == "__main__":
-    list_vac = []
-    for i in get_vacancy(text):
+def dump_vacancy_json():
+    """
+    Функция записывает найденные вакансии в Json файл
+    """
+    list_vac = [] ## список сформированных данных по вакансиям
+    for i in get_vacancy():
         vac = get_data(i)
         list_vac.append(vac)
-    with open("SJ_vacancyes.json", "w", encoding="utf=8", ) as f:
+
+    with open("SJ_vacancyes.json", "w", encoding="utf=8") as f: #
         json.dump(list_vac, f, indent=4, ensure_ascii=False)
 
-
-
+dump_vacancy_json()
