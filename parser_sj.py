@@ -28,17 +28,17 @@ def get_soup(text=input('Введите название вакансии: '), n
 
     if link == None:
 
-        if n >= 2:
+        if n >= 2: # условие для обработки любой страницы кроме первой
             data = requests.get(
                 url=f'{url}/vacancy/search/?keywords={text}&page={n}',
                 headers={"user-agent": ua.random}
             )
-        else:
+        else: ## Условие для обработки самой первой страницы у которой нет атрибута page
             data = requests.get(
                 url=f'{url}/vacancy/search/?keywords={text}',
                 headers={"user-agent": ua.random}
             )
-    else:
+    else: # если аргумент функции link определен то он используется
         data = requests.get(
             url=link,
             headers={"user-agent": ua.random}
@@ -95,15 +95,16 @@ def get_data(link):
     except:
         description = '-'
     vacancy = {
+        "link": link,
         "name": name,
         "salary": salary,
-        "description": description,
-        "link": link
+        "description": description
+
     }  ## формирую данные в формате словаря
     return vacancy
 
-
-def dump_vacancy_json():
+file_name = "SJ_vacancyes.json"
+def dump_vacancy_json(file_name):
     """
     Функция записывает найденные вакансии в Json файл
     """
@@ -112,7 +113,7 @@ def dump_vacancy_json():
         vac = get_data(i)
         list_vac.append(vac)
 
-    with open("SJ_vacancyes.json", "w", encoding="utf=8") as f: #
+    with open(file_name, "w", encoding="utf=8") as f: # запись в файл Json данных созданного списка данных по вакансиям
         json.dump(list_vac, f, indent=4, ensure_ascii=False)
 
-dump_vacancy_json()
+dump_vacancy_json(file_name)
