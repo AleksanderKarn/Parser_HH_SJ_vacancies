@@ -10,7 +10,7 @@ ua = FU.UserAgent()
 
 url_dict = {
             'url_hh': 'https://hh.ru',
-            'url_sj': 'https://www.superjob.ru''https://www.superjob.ru'
+            'url_sj': 'https://www.superjob.ru'
 }
 
 class Engine(ABC):
@@ -169,7 +169,7 @@ class SuperJob(Engine):
     """создает файл джейсон с данными по нужным нам вакансиям c HH.ru"""
 
     def get_request(self, text):
-        self.dump_vacancy_json(self, text)
+        return self.dump_vacancy_json(self, text)
 
     def page_count(self, text):
         soup = self.get_soup(text, n=0)
@@ -209,7 +209,7 @@ class SuperJob(Engine):
                     list_vacancies.append(f"{url_dict['url_sj']}{a['href']}")  # формирую строку - ссылку и складываю ее в список
 
     def get_data(self, link):
-        soup = self.get_soup(n=0, link=link)  ## генерирую данные из ссылок на вакансии  и достаю нужные
+        soup = self.get_soup(n=0, link=link, text=None)  ## генерирую данные из ссылок на вакансии  и достаю нужные
         try:
             name = soup.find(attrs={'class': "_2s70W _31udi _7mW5l _17ECX _1B2ot _3EXZS _3pAka ofdOE"}).text
             print(name)

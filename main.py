@@ -5,9 +5,9 @@ from jobs_classes import HHVacancy, SJVacancy
 
 def load_vacancy(jobClass, fn, jobVacancy, text):
     connector = jobClass.get_connector(fn)
-  # data = jobClass().get_request(text)
+    data = jobClass().get_request(text)
 
-#    connector.data_file = data
+    connector.data_file = data
     l = []
     for i in connector.select():
         l.append(jobVacancy(i))
