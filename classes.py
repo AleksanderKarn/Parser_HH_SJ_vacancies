@@ -81,10 +81,6 @@ class Connector:
 
         for i in data:
 
-            print(f'{list(query.keys())[0]}')
-            print('*'* 40)
-            print(f'{list(query.values())[0]}')
-
             if i[f'{list(query.keys())[0]}'] == f'{list(query.values())[0]}':
                 query_data.append(i)
         print(query_data)

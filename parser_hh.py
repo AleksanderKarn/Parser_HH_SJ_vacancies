@@ -166,7 +166,6 @@ class HH(Engine):
                     url=f'{url}/search/vacancy?text={text}',
                     headers={"user-agent": ua.random}
                 )
-
         else:  # если аргумент функции link определен то он используется
             data = requests.get(
                 url=link,

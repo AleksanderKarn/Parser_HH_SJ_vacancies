@@ -17,20 +17,20 @@ class Connector:
         self.__data_file = df
         self.__connect()
 
-
-
     @property
     def data_file(self):
-        pass
+        return self.__data_file
 
     @data_file.setter
     def data_file(self, value):
         # тут должен быть код для установки файла
         self.__connect()
+        with open(self.__data_file, 'w', encoding="utf=8") as f:
+            json.dump(f, value)
 
     def __connect(self):
 
-        print(f'Работает метод __connect__- проверка/создание файла')
+        print(f'Работает метод __connect__- проверка/создание файла {self.__data_file}')
         """
         Проверка на существование файла с данными и
         создание его при необходимости
@@ -253,10 +253,6 @@ class Engine(ABC):
 
 
 
-
-
-
-
 class SuperJob(Engine):
     """создает файл джейсон с данными по нужным нам вакансиям c HH.ru"""
     def __init__(self, url, file_name):
@@ -348,13 +344,6 @@ class SuperJob(Engine):
 
 
 
+vac = SuperJob('https://www.superjob.ru', 'sj_vacancyes.json')
 
-class HH(Engine):
-    """создает файл джейсон с данными по нужным нам вакансиям с Sj"""
-    def get_request(self):
-        pass
-
-
-vac = SuperJob('https://www.superjob.ru', 'SJ_vacancyes.json')
-
-asd = vac.get_connector('SJ_vacancyes.json')
+asd = vac.get_request()
