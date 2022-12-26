@@ -36,7 +36,6 @@ def load_vacancy(job_class, fn, job_vacancy, text):
     list_filter = []
     for i in connector.select():
         list_filter.append(job_vacancy(i))
-
     return list_filter
 
 def load_vacancy_by_job(job, text):
@@ -48,7 +47,7 @@ def load_vacancy_by_job(job, text):
     :return: "входные данные (значения апгументов ) для функции '__load_vacancy__'"
     """
     if (job == '0'):
-        return load_vacancy(HH, 'hh.json', HHVacancy, text)
+        return load_vacancy(HH, f"vac_{text}.json", HHVacancy, text)
     elif (job == '1'):
-        return load_vacancy(SuperJob, 'sj.json', SJVacancy, text)
+        return load_vacancy(SuperJob, f"vac_{text}.json", SJVacancy, text)
 

@@ -38,7 +38,8 @@ class Vacancy:
 
 
 class CountMixin:
-    def get_count_of_vacancy(self, file):
+    @staticmethod
+    def get_count_of_vacancy(file):
         """
         Вернуть количество вакансий от текущего сервиса.
         Получать количество необходимо динамически из файла.
@@ -48,7 +49,7 @@ class CountMixin:
         return len(data)
 
 
-class HHVacancy(Vacancy, CountMixin):  # add counter mixin
+class HHVacancy(CountMixin, Vacancy):  # add counter mixin
     """ HeadHunter Vacancy """
     def __str__(self):
         return f'HH: {self.name}. | Зарплата: {self.salary}'
@@ -58,3 +59,4 @@ class SJVacancy(Vacancy, CountMixin):  # add counter mixin
     """ SuperJob Vacancy """
     def __str__(self):
         return f'SJ: {self.name}. | Зарплата: {self.salary}'
+

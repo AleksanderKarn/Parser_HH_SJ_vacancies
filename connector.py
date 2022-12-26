@@ -72,8 +72,6 @@ class Connector:
         for i in data:
             if i['salary'] >= query:
                 query_data.append(i)
-       # for j in query_data:
-       #     print(j)
         return query_data
 
     def delete(self, query):
