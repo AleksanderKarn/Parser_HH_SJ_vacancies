@@ -98,19 +98,19 @@ class HH(Engine):
             soup.find("div", attrs={"class": "pager"}).find_all("span", recursive=False)[-1].find("a").find(
                 "span").text
         )  ## методом проб и ошибок вычислил такой вот способ вычленения значения всех страниц вакансий
-        print(f"Всего страниц: {pager_count}")
-        return 1
-
+        print(f"Всего: {pager_count} страниц с вакансией {text} на HH.ru")
+        if pager_count < 50:
+            print(f"вакансий всего {pager_count * 20}")
+            return pager_count
+        return 50  # 50 страниц по 20 вакансий = 1000 как в условии курсовой
     def get_soup(self, text, n=0, link=None):
         if link == None:
             if n >= 2:  # условие для обработки любой страницы кроме первой
-                print(f'идем на {n} страницу')
                 data = requests.get(
                     url=f'{url_dict["url_hh"]}/search/vacancy?text={text}&from=suggest_post&area=1&page={n}',
                     headers={"user-agent": ua.random}
                 )
             else:  ## Условие для обработки самой первой страницы у которой нет атрибута page
-                print('Идем на первую страницу')
                 data = requests.get(
                     url=f'{url_dict["url_hh"]}/search/vacancy?text={text}',
                     headers={"user-agent": ua.random}
@@ -139,13 +139,13 @@ class HH(Engine):
         try:
             if 'USD' in sal.split(' '):
                 salary = int(sal.split(' ')[1]) * 68.68
-                print(salary)
             elif 'KZT' in sal.split(' '):
                 salary = int(sal.split(' ')[1]) * 0.1471
-                print(salary)
+            elif 'EUR' in sal.split(' '):
+                salary = int(sal.split(' ')[1]) * 73.04
             else:
                 salary = int(sal.split(' ')[1])
-                print(salary)
+
         except:
             salary = 0
         try:
@@ -155,7 +155,6 @@ class HH(Engine):
             salary_display = ''
         try:
             description = soup.find(attrs={'class': "g-user-content"}).text
-            print(description)
         except:
             description = '-'
         vacancy = {
@@ -164,7 +163,6 @@ class HH(Engine):
             "salary": salary,
             "salary_display": salary_display,
             "description": description
-
         }  ## формирую данные в формате словаря
         return vacancy
 
@@ -182,7 +180,11 @@ class SuperJob(Engine):
                 'div', attrs={
                     'class': '_2zPWM _9mI07 _2refD _35SiA _3Gpjg _3vngu _1GAZu'}).find_all('span', recursive=True)[-6].text
         )  ## методом проб и ошибок вычислил такой вот способ вычленения значения всех страниц вакансий
-        return 1
+        print(f"Всего: {pager_count} страниц с вакансией {text} на SuperJob")
+        if pager_count < 50:
+            print(f"вакансий всего ~ {pager_count * 20}")
+            return pager_count
+        return 50  # 50 страниц по 20 вакансий = 1000 как в условии курсовой
 
     def get_soup(self, text, n=0, link=None):
         if link == None:
@@ -219,7 +221,7 @@ class SuperJob(Engine):
             name = soup.find(attrs={'class': "_2s70W _31udi _7mW5l _17ECX _1B2ot _3EXZS _3pAka ofdOE"}).text
             print(name)
         except:
-            name = 'Название не указано'
+            name = 'Название ваканчии не указано'
         try:
             salary = int(re.sub(r'[^0-9.]+', r'', sal.text.replace(' ', '')))
             if salary == "":
@@ -228,7 +230,6 @@ class SuperJob(Engine):
                 n = len(''.join(str(salary)))//2
                 salary = list(''.join(str(salary)))[:n]
                 salary = int(''.join(salary))
-                print(salary)
         except:
             salary = 0
         try:
@@ -238,7 +239,6 @@ class SuperJob(Engine):
             salary_display = 'Зп не указана'
         try:
             description = soup.find(attrs={'class': "_1G5lt _3EXZS _3pAka _3GChV _2GgYH"}).text
-            print(description)
         except:
             description = '-'
         vacancy = {

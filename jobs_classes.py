@@ -1,3 +1,4 @@
+import json
 class Vacancy:
     __slots__ = ('name', 'link', 'description', 'salary', 'salary_display')
 
@@ -37,12 +38,14 @@ class Vacancy:
 
 
 class CountMixin:
-    def get_count_of_vacancy(self, count):
+    def get_count_of_vacancy(self, file):
         """
         Вернуть количество вакансий от текущего сервиса.
         Получать количество необходимо динамически из файла.
         """
-        return len(count)
+        with open(file, encoding="utf=8") as f:
+            data = json.load(f)
+        return len(data)
 
 
 class HHVacancy(Vacancy, CountMixin):  # add counter mixin

@@ -1,9 +1,7 @@
 ### основное тело программы
-from class_Engine import HH, SuperJob
-from jobs_classes import HHVacancy, SJVacancy
 import json
-from utils import sorting, get_top
-
+from utils import sorting, get_top, load_vacancy_by_job
+from jobs_classes import HHVacancy, SJVacancy
 commandList = {
         'list': "Вывести все вакансии sorted",
         'top 10': "Вывести топ 10 ваканчий по ЗП",
@@ -11,31 +9,10 @@ commandList = {
         'exit': "Выход из программы"
     }
 
-
-def load_vacancy(jobClass, fn, jobVacancy, text):
-    connector = jobClass.get_connector(fn)
-    data = jobClass().get_request(text)
-
-    connector.data_file = data
-    list_filter = []
-    for i in connector.select():
-        list_filter.append(jobVacancy(i))
-
-    return list_filter
-
-
-def load_vacancy_by_job(job, text):
-    if (job == '0'):
-        return load_vacancy(HH, 'hh.json', HHVacancy, text)
-    elif (job == '1'):
-        return load_vacancy(SuperJob, 'sj.json', SJVacancy, text)
-
-
 if __name__ == '__main__':
     job = input('Выберите сервис HH(0) или SJ(1): ')
     if not job or (job != '1' and job != '0'):
         print('Error')
-
 
     text = input('Введите название вакансии, по умолчанию используется "Python": ')
 
@@ -44,9 +21,10 @@ if __name__ == '__main__':
 
     listVacancy = load_vacancy_by_job(job, text)
 
-
     while True:
+        print('*' * 60)
         command = input('Введите команду: ')
+        print('*' * 60)
 
         if command == 'exit':
             print('Завершение работы программы...')
@@ -59,6 +37,13 @@ if __name__ == '__main__':
                 print(i)
         elif command == 'help':
             print(commandList)
+      #  elif command == 'len':
+      #      if job == 0:
+      #          a = HHVacancy.get_count_of_vacancy(connector.data_file('hh.json'),'hh.json')
+      #          print(a)
+      #      else:
+      #          a = SJVacancy.get_count_of_vacancy('hh.json')
+      #          print(a)
         else:
             com = command.split(' ')[1]
             if len(command.split(' ')) > 1 and command.split(' ')[0] == 'top':
