@@ -18,18 +18,35 @@ def get_top(vacancies, top_count):
         top_vacancies.append(i)
         count += 1
 
-
-def load_vacancy(jobClass, fn, jobVacancy, text):
-    connector = jobClass.get_connector(fn)
-    data = jobClass().get_request(text)
+def load_vacancy(job_class, fn, job_vacancy, text):
+    """
+    Функция инициализирует коннектор и экземпляр
+     класса вакансий, далше проходит цуиклом
+     по отфильтрованным  вакансиям и собиравет
+     их в список
+    :param jobClass: имя Класса вакансий
+    :param fn:  имя файла с вакансиями в json
+    :param jobVacancy: имя класса вакансии
+    :param text: названиек вакансии
+    :return: список объктов вакакнсий отфильтрованный по зарплате
+    """
+    connector = job_class.get_connector(fn)
+    data = job_class().get_request(text)
     connector.data_file = data
     list_filter = []
     for i in connector.select():
-        list_filter.append(jobVacancy(i))
+        list_filter.append(job_vacancy(i))
 
     return list_filter
 
 def load_vacancy_by_job(job, text):
+    """
+    Функция определяет входные данные
+     для поиска в зависимости от ввода пользователя
+    :param job: "числовое значение введенное пользователем при выборе сервиса поиска работы"
+    :param text: "наименование профессии по которой осуществляется поиск "
+    :return: "входные данные (значения апгументов ) для функции '__load_vacancy__'"
+    """
     if (job == '0'):
         return load_vacancy(HH, 'hh.json', HHVacancy, text)
     elif (job == '1'):

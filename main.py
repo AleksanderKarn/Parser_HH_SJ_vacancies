@@ -21,7 +21,7 @@ if __name__ == '__main__':
 
     listVacancy = load_vacancy_by_job(job, text)
 
-    while True:
+    while True: ## цикл для работы с данными файла при помощи доступных команд
         print('*' * 60)
         command = input('Введите команду: ')
         print('*' * 60)
