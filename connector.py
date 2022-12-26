@@ -1,6 +1,7 @@
 import json
 import os
 
+
 class Connector:
     """
     Класс коннектор к файлу, обязательно файл должен быть в json формате
@@ -53,7 +54,7 @@ class Connector:
         with open(self.__data_file, "w", encoding="utf=8") as f:
             json.dump(r_data, f)
 
-    def select(self, query=int(input('введите фильтр: '))):
+    def select(self, query):
         print(f'работает метод __select__ фильтруект по {query}')
         """
         Выбор данных из файла с применением фильтрации

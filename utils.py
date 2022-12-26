@@ -2,6 +2,7 @@
 from class_Engine import HH, SuperJob
 from jobs_classes import HHVacancy, SJVacancy
 
+
 def sorting(vacancies):
     """ Должен сортировать любой список вакансий по ежемесячной оплате (gt, lt magic methods) """
     return sorted(vacancies, reverse=True)
@@ -10,15 +11,10 @@ def sorting(vacancies):
 def get_top(vacancies, top_count):
     """ Должен возвращать {top_count} записей из вакансий по зарплате (iter, next magic methods) """
     ## взять N первых строк вакансий
-    count = 0
-    top_vacancies = []
-    for i in sorting(vacancies):
-        if count == top_count:
-            return top_vacancies
-        top_vacancies.append(i)
-        count += 1
+    return sorted(vacancies, reverse=True)[:top_count]
 
-def load_vacancy(job_class, fn, job_vacancy, text):
+
+def load_vacancy(job_class, fn, job_vacancy, text, query):
     """
     Функция инициализирует коннектор и экземпляр
      класса вакансий, далше проходит цуиклом
@@ -34,11 +30,12 @@ def load_vacancy(job_class, fn, job_vacancy, text):
     data = job_class().get_request(text)
     connector.data_file = data
     list_filter = []
-    for i in connector.select():
+    for i in connector.select(query):
         list_filter.append(job_vacancy(i))
     return list_filter
 
-def load_vacancy_by_job(job, text):
+
+def load_vacancy_by_job(job, text, query):
     """
     Функция определяет входные данные
      для поиска в зависимости от ввода пользователя
@@ -47,7 +44,11 @@ def load_vacancy_by_job(job, text):
     :return: "входные данные (значения апгументов ) для функции '__load_vacancy__'"
     """
     if (job == '0'):
-        return load_vacancy(HH, f"vac_{text}.json", HHVacancy, text)
+        return load_vacancy(HH, f"vac_{text}.json", HHVacancy, text, query)
     elif (job == '1'):
-        return load_vacancy(SuperJob, f"vac_{text}.json", SJVacancy, text)
+        return load_vacancy(SuperJob, f"vac_{text}.json", SJVacancy, text, query)
 
+
+def print_vacancies(vacancies):
+    for vacancy in vacancies:
+        print(vacancy)

@@ -1,14 +1,14 @@
 ### основное тело программы
-import json
-from utils import sorting, get_top, load_vacancy_by_job
+from utils import sorting, get_top, load_vacancy_by_job, print_vacancies
 from jobs_classes import HHVacancy, SJVacancy
+
 commandList = {
-        'list': "Вывести все вакансии sorted",
-        'top 10': "Вывести топ 10 ваканчий по ЗП",
-        'help': "Вывести список доступных команд",
-        'exit': "Выход из программы",
-        'len': "Вывести колличество вакансий всего"
-    }
+    'list': "Вывести все вакансии sorted",
+    'top 10': "Вывести топ 10 ваканчий по ЗП",
+    'help': "Вывести список доступных команд",
+    'exit': "Выход из программы",
+    'len': "Вывести колличество вакансий всего"
+}
 
 if __name__ == '__main__':
     job = input('Выберите сервис HH(0) или SJ(1): ')
@@ -19,10 +19,11 @@ if __name__ == '__main__':
 
     if not text:
         text = 'Python'
+    query = int(input('введите фильтр: '))
 
-    listVacancy = load_vacancy_by_job(job, text)
+    list_vacancy = load_vacancy_by_job(job, text, query)
 
-    while True: ## цикл для работы с данными файла при помощи доступных команд
+    while True:  ## цикл для работы с данными файла при помощи доступных команд
         print('*' * 60)
         command = input('Введите команду: ')
         print('*' * 60)
@@ -31,25 +32,17 @@ if __name__ == '__main__':
             print('Завершение работы программы...')
             break
         elif command == 'list':
-            with open('sj.json', encoding="utf-8") as f:
-                data = json.load(f)
-                sort_list = sorting(listVacancy)
-            for i in sort_list:
-                print(i)
+            print_vacancies(sorting(list_vacancy))
         elif command == 'help':
             print(commandList)
         elif command == 'len':
             if job == 0:
-                a = HHVacancy
-                print(a.get_count_of_vacancy('hh.json'))
+                print(HHVacancy.get_count_of_vacancy(list_vacancy))
             else:
-                a = SJVacancy
-                print(a.get_count_of_vacancy('sj.json'))
+                print(SJVacancy.get_count_of_vacancy(list_vacancy))
         else:
-            com = command.split(' ')[1]
-            if len(command.split(' ')) > 1 and command.split(' ')[0] == 'top':
-                top_vacancy = get_top(listVacancy, int(com))
-                for i in top_vacancy:
-                    print(i)
+            com = command.split(' ')
+            if len(com) > 1 and com[0] == 'top' and com[1]:
+                print_vacancies(get_top(list_vacancy, int(com[1])))
             else:
                 print('Не верная команда! Введите help для просмотра доступных команд')

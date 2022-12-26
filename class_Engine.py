@@ -4,8 +4,8 @@ import fake_useragent as FU
 from abc import ABC, abstractmethod
 from connector import Connector
 import re
-ua = FU.UserAgent()
 
+ua = FU.UserAgent()
 url_dict = {
     'url_hh': 'https://hh.ru',
     'url_sj': 'https://www.superjob.ru'
@@ -65,9 +65,8 @@ class Engine(ABC):
         :return: список вакансий
         """
         list_vacancies = []  # список вакаансий со страницы сервиса
-        for i in range(
-                self.page_count(
-                    text) + 1):  # основной цикл програмы проходящий по каждой странице в зависимости от их колличества
+        for i in range(self.page_count(
+                text) + 1):  # основной цикл програмы проходящий по каждой странице в зависимости от их колличества
             if i == 0:
                 continue
             else:  ## условие попадания на первую страницу вакансий
@@ -116,6 +115,7 @@ class HH(Engine):
             print(f"вакансий всего {pager_count * 20}")
             return pager_count
         return 50  # 50 страниц по 20 вакансий = 1000 как в условии курсовой
+
     def get_soup(self, text, n=0, link=None):
         """
          Функция возвращает данные HTML страницы с вакансиями
@@ -201,7 +201,8 @@ class SuperJob(Engine):
         pager_count = int(
             soup.find(
                 'div', attrs={
-                    'class': '_2zPWM _9mI07 _2refD _35SiA _3Gpjg _3vngu _1GAZu'}).find_all('span', recursive=True)[-6].text
+                    'class': '_2zPWM _9mI07 _2refD _35SiA _3Gpjg _3vngu _1GAZu'}).find_all('span', recursive=True)[
+                -6].text
         )  ## методом проб и ошибок вычислил такой вот способ вычленения значения всех страниц вакансий
         print(f"Всего: {pager_count} страниц с вакансией {text} на SuperJob")
         if pager_count < 50:
@@ -246,11 +247,11 @@ class SuperJob(Engine):
         except:
             name = 'Название ваканчии не указано'
         try:
-            salary = int(re.sub(r'[^0-9.]+', r'', sal.text.replace(' ', '')))
+            salary = int(re.sub(r'[^he0-9.]+', r'', sal.text.replace(' ', '')))
             if salary == "":
                 salary = 0
             elif len(''.join(str(salary))) >= 10:
-                n = len(''.join(str(salary)))//2
+                n = len(''.join(str(salary))) // 2
                 salary = list(''.join(str(salary)))[:n]
                 salary = int(''.join(salary))
         except:

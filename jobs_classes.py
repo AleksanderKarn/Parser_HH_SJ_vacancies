@@ -1,4 +1,3 @@
-import json
 class Vacancy:
     __slots__ = ('name', 'link', 'description', 'salary', 'salary_display')
 
@@ -30,33 +29,26 @@ class Vacancy:
     def __ge__(self, other):
         return self.salary >= other.salary
 
-    def __iter__(self):
-        pass
-
-    def __next__(self):
-        pass
-
 
 class CountMixin:
     @staticmethod
-    def get_count_of_vacancy(file):
+    def get_count_of_vacancy(vacancies):
         """
         Вернуть количество вакансий от текущего сервиса.
         Получать количество необходимо динамически из файла.
         """
-        with open(file, encoding="utf=8") as f:
-            data = json.load(f)
-        return len(data)
+        return len(vacancies)
 
 
 class HHVacancy(CountMixin, Vacancy):  # add counter mixin
     """ HeadHunter Vacancy """
+
     def __str__(self):
         return f'HH: {self.name}. | Зарплата: {self.salary}'
 
 
 class SJVacancy(Vacancy, CountMixin):  # add counter mixin
     """ SuperJob Vacancy """
+
     def __str__(self):
         return f'SJ: {self.name}. | Зарплата: {self.salary}'
-
