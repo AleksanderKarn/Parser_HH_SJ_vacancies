@@ -1,26 +1,18 @@
 import requests
 from bs4 import BeautifulSoup as BS
 import fake_useragent as FU
-import json
 from abc import ABC, abstractmethod
 from connector import Connector
-
-
+import re
 ua = FU.UserAgent()
 
 url_dict = {
-            'url_hh': 'https://hh.ru',
-            'url_sj': 'https://www.superjob.ru'
+    'url_hh': 'https://hh.ru',
+    'url_sj': 'https://www.superjob.ru'
 }
 
+
 class Engine(ABC):
-    file_name: str
-
-    #def __init__(self, url, file_name, text):
-    #    self.url = url
-    #    self.file_name = file_name
-    #    self.text = text
-
     @abstractmethod
     def get_request(self, text):  # должен быть переопределен в дочернем классе
         raise NotImplementedError('Метод __get_request__ должен быть переопределен в дочернем классе!')
@@ -41,6 +33,7 @@ class Engine(ABC):
         """
         raise NotImplementedError('Метод __get_soup__ должен быть переопределен в дочернем классе!')
 
+    @abstractmethod
     def get_link(self, soup, list_vacancies):
         """
         Функция проходит циклом по всем ссылкам
@@ -66,7 +59,8 @@ class Engine(ABC):
         """
         list_vacancies = []  # список вакаансий со страницы сервиса
         for i in range(
-                self.page_count(text) + 1):  # основной цикл програмы проходящий по каждой странице в зависимости от их колличества
+                self.page_count(
+                    text) + 1):  # основной цикл програмы проходящий по каждой странице в зависимости от их колличества
             if i == 0:
                 continue
             else:  ## условие попадания на первую страницу вакансий
@@ -84,9 +78,6 @@ class Engine(ABC):
             vac = self.get_data(i)
             list_vac.append(vac)
         return list_vac
-        #with open(file_name, "w",
-        #          encoding="utf=8") as f:  # запись в файл Json данных созданного списка данных по вакансиям
-        #    json.dump(list_vac, f, indent=4, ensure_ascii=False)
 
     @staticmethod
     def get_connector(file_name):
@@ -98,9 +89,7 @@ class HH(Engine):
     """создает файл джейсон с данными по нужным нам вакансиям с Sj"""
 
     def get_request(self, text):
-       # self.dump_vacancy_json(self, text)
         return self.dump_vacancy_json(self, text)
-
 
     def page_count(self, text):
         soup = self.get_soup(text, n=0)
@@ -140,25 +129,40 @@ class HH(Engine):
 
     def get_data(self, link):
         soup = self.get_soup(n=0, link=link, text=None)  ## генерирую данные из ссылок на вакансии  и достаю нужные
+        sal = soup.find(
+            attrs={'class': "bloko-header-section-2 bloko-header-section-2_lite"}).text.replace('\xa0', '')
         try:
             name = soup.find(attrs={'class': "bloko-header-section-1"}).text
+            print(name)
         except:
             name = 'Название не указано'
         try:
-            salary = soup.find(attrs={'class': "bloko-header-section-2 bloko-header-section-2_lite"}).text.replace(
-                '\xa0',
-                '')
-            print(salary)
+            if 'USD' in sal.split(' '):
+                salary = int(sal.split(' ')[1]) * 68.68
+                print(salary)
+            elif 'KZT' in sal.split(' '):
+                salary = int(sal.split(' ')[1]) * 0.1471
+                print(salary)
+            else:
+                salary = int(sal.split(' ')[1])
+                print(salary)
         except:
-            salary = 'Зп не указана'
+            salary = 0
+        try:
+            salary_display = sal
+            print(salary_display)
+        except:
+            salary_display = ''
         try:
             description = soup.find(attrs={'class': "g-user-content"}).text
+            print(description)
         except:
             description = '-'
         vacancy = {
             "link": link,
             "name": name,
             "salary": salary,
+            "salary_display": salary_display,
             "description": description
 
         }  ## формирую данные в формате словаря
@@ -176,10 +180,9 @@ class SuperJob(Engine):
         pager_count = int(
             soup.find(
                 'div', attrs={
-                    'class': '_2zPWM _9mI07 _2refD _35SiA _3Gpjg _3vngu _1GAZu'}).find_all('span', recursive=True)[
-                -6].text
+                    'class': '_2zPWM _9mI07 _2refD _35SiA _3Gpjg _3vngu _1GAZu'}).find_all('span', recursive=True)[-6].text
         )  ## методом проб и ошибок вычислил такой вот способ вычленения значения всех страниц вакансий
-        return pager_count
+        return 1
 
     def get_soup(self, text, n=0, link=None):
         if link == None:
@@ -206,20 +209,33 @@ class SuperJob(Engine):
             if a['href'].split('.')[-1] == 'html':  # выбираю ссылки по ключу 'href' заканчивающиеся на 'html'
                 if 'vakansii' in a['href'].split(
                         '/'):  ## дальше работаю со строкой разбивая ее по слешу и выбирая лиш те строки в которых есть слово vacancy
-                    list_vacancies.append(f"{url_dict['url_sj']}{a['href']}")  # формирую строку - ссылку и складываю ее в список
+                    list_vacancies.append(
+                        f"{url_dict['url_sj']}{a['href']}")  # формирую строку - ссылку и складываю ее в список
 
     def get_data(self, link):
         soup = self.get_soup(n=0, link=link, text=None)  ## генерирую данные из ссылок на вакансии  и достаю нужные
+        sal = soup.find(attrs={'class': "f-test-text-company-item-salary"})
         try:
             name = soup.find(attrs={'class': "_2s70W _31udi _7mW5l _17ECX _1B2ot _3EXZS _3pAka ofdOE"}).text
             print(name)
         except:
             name = 'Название не указано'
         try:
-            salary = soup.find(attrs={'class': "f-test-text-company-item-salary"}).text.replace(' ', '')
-            print(salary)
+            salary = int(re.sub(r'[^0-9.]+', r'', sal.text.replace(' ', '')))
+            if salary == "":
+                salary = 0
+            elif len(''.join(str(salary))) >= 10:
+                n = len(''.join(str(salary)))//2
+                salary = list(''.join(str(salary)))[:n]
+                salary = int(''.join(salary))
+                print(salary)
         except:
-            salary = 'Зп не указана'
+            salary = 0
+        try:
+            salary_display = sal.text.replace(' ', '')
+            print(salary_display)
+        except:
+            salary_display = 'Зп не указана'
         try:
             description = soup.find(attrs={'class': "_1G5lt _3EXZS _3pAka _3GChV _2GgYH"}).text
             print(description)
@@ -229,7 +245,7 @@ class SuperJob(Engine):
             "link": link,
             "name": name,
             "salary": salary,
+            "salary_display": salary_display,
             "description": description
-
         }  ## формирую данные в формате словаря
         return vacancy

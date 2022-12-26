@@ -1,6 +1,15 @@
 ### основное тело программы
 from class_Engine import HH, SuperJob
 from jobs_classes import HHVacancy, SJVacancy
+import json
+from utils import sorting, get_top
+
+commandList = {
+        'list': "Вывести все вакансии sorted",
+        'top 10': "Вывести топ 10 ваканчий по ЗП",
+        'help': "Вывести список доступных команд",
+        'exit': "Выход из программы"
+    }
 
 
 def load_vacancy(jobClass, fn, jobVacancy, text):
@@ -8,15 +17,14 @@ def load_vacancy(jobClass, fn, jobVacancy, text):
     data = jobClass().get_request(text)
 
     connector.data_file = data
-    l = []
+    list_filter = []
     for i in connector.select():
-        l.append(jobVacancy(i))
-    return l
+        list_filter.append(jobVacancy(i))
 
+    return list_filter
 
 
 def load_vacancy_by_job(job, text):
-
     if (job == '0'):
         return load_vacancy(HH, 'hh.json', HHVacancy, text)
     elif (job == '1'):
@@ -28,33 +36,34 @@ if __name__ == '__main__':
     if not job or (job != '1' and job != '0'):
         print('Error')
 
-    text = input('Введите название вакансии: ')
 
-   # select = input('?Введите минимальную зарплату: ')
+    text = input('Введите название вакансии, по умолчанию используется "Python": ')
 
     if not text:
         text = 'Python'
-    print(text)
+
     listVacancy = load_vacancy_by_job(job, text)
 
-    commandList = [
-        'list',  # вывести все вакансии sorted
-        'top',  # вывести топ top 1000
-        'help',  #
-        'exit'  # выход
-    ]
+
     while True:
         command = input('Введите команду: ')
 
         if command == 'exit':
+            print('Завершение работы программы...')
             break
         elif command == 'list':
-            print('list')
+            with open('sj.json', encoding="utf-8") as f:
+                data = json.load(f)
+                sort_list = sorting(listVacancy)
+            for i in sort_list:
+                print(i)
         elif command == 'help':
             print(commandList)
         else:
-            c = command.split(' ')
-            if c[0] == 'top' and c[1]:
-                print('top')
+            com = command.split(' ')[1]
+            if len(command.split(' ')) > 1 and command.split(' ')[0] == 'top':
+                top_vacancy = get_top(listVacancy, int(com))
+                for i in top_vacancy:
+                    print(i)
             else:
-                print('Error')
+                print('Не верная команда! Введите help для просмотра доступных команд')

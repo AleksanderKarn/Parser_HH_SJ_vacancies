@@ -1,6 +1,5 @@
 import json
 import os
-import re
 
 class Connector:
     """
@@ -21,13 +20,11 @@ class Connector:
 
     @data_file.setter
     def data_file(self, value):
-        # тут должен быть код для установки файла
         self.__connect()
         with open(self.__data_file, 'w', encoding="utf=8") as f:
             json.dump(value, f, indent=4, ensure_ascii=False)
 
     def __connect(self):
-
         print(f'Работает метод __connect__- проверка/создание файла')
         """
         Проверка на существование файла с данными и
@@ -39,9 +36,6 @@ class Connector:
             with open(self.__data_file, 'w', encoding="utf=8") as f:
                 json.dump([], f)
 
-            return
-
-        # print('проверить на деградацию и возбудить исключение')
         with open(self.__data_file, encoding="utf=8") as f:
             try:
                 json.load(f)
@@ -59,7 +53,7 @@ class Connector:
         with open(self.__data_file, "w", encoding="utf=8") as f:
             json.dump(r_data, f)
 
-    def select(self, query=None):
+    def select(self, query=int(input('введите фильтр: '))):
         print(f'работает метод __select__ фильтруект по {query}')
         """
         Выбор данных из файла с применением фильтрации
@@ -70,16 +64,16 @@ class Connector:
         """
         with open(self.__data_file, encoding="utf-8") as f:
             data = json.load(f)
-            print(data)
-        return data
-      #  if not query: return data  ## если квери пустой запрос на фильтрацию данных то возвращаем все данные файла
+
+        if not query: return data  ## если квери пустой запрос на фильтрацию данных то возвращаем все данные файла
 
         query_data = []  ## отфильтрованный список
 
         for i in data:
-            if [int(s) for s in re.findall(r'\b\d+\b', f'Элемент {i[list(query.keys())[0]]}')] != []:
-                if [int(s) for s in re.findall(r'\b\d+\b', f'Элемент {i[list(query.keys())[0]]}')][0] >= int(list(query.values())[0]):
-                    query_data.append(i)
+            if i['salary'] >= query:
+                query_data.append(i)
+        for j in query_data:
+            print(j)
         return query_data
 
     def delete(self, query):
