@@ -6,7 +6,8 @@ commandList = {
         'list': "Вывести все вакансии sorted",
         'top 10': "Вывести топ 10 ваканчий по ЗП",
         'help': "Вывести список доступных команд",
-        'exit': "Выход из программы"
+        'exit': "Выход из программы",
+        'len': "Вывести колличество вакансий всего"
     }
 
 if __name__ == '__main__':
@@ -37,13 +38,13 @@ if __name__ == '__main__':
                 print(i)
         elif command == 'help':
             print(commandList)
-      #  elif command == 'len':
-      #      if job == 0:
-      #          a = HHVacancy.get_count_of_vacancy(connector.data_file('hh.json'),'hh.json')
-      #          print(a)
-      #      else:
-      #          a = SJVacancy.get_count_of_vacancy('hh.json')
-      #          print(a)
+        elif command == 'len':
+            if job == 0:
+                a = HHVacancy
+                print(a.get_count_of_vacancy('hh.json'))
+            else:
+                a = SJVacancy
+                print(a.get_count_of_vacancy('sj.json'))
         else:
             com = command.split(' ')[1]
             if len(command.split(' ')) > 1 and command.split(' ')[0] == 'top':
